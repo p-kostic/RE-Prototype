@@ -65,6 +65,9 @@ typings/
 .idea
 *.iml
 .git
+api/jetty*
+api/out
+api/target
 
 
 .*.swp
