@@ -1,5 +1,5 @@
 
-const URL = 'https://178.128.252.36/api/';
+const URL = 'https://vdzijden.com/api/';
 
 chrome.runtime.sendMessage({ type: "INJECT_STYLE" });
 
@@ -10,7 +10,7 @@ chrome.storage.local.get(['uuid', 'enabled'], ({uuid, enabled}) => {
         chrome.storage.local.set({uuid});
     }
 
-    fetch(URL + `?uuid=${uuid}&enabled=${enabled}`, {mode: "cors", method: "GET", credentials: "include"})
+    fetch(URL + `?uuid=${uuid}&enabled=${enabled}&host=${window.location.host}`, {mode: "cors", method: "GET", credentials: "include"})
         .then(response => response.text())
         .then(css => {
             chrome.runtime.sendMessage({
