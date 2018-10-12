@@ -1,0 +1,36 @@
+{
+  "name": "Eyestrain reliever 3000",
+  "version": "0.0.1",
+  "manifest_version": 2,
+  "description": "No eyestrain no gain",
+  "homepage_url": "http://pornhub.com",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "default_locale": "en",
+  "background": {
+    "page": "src/bg/background.html",
+    "persistent": true
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.google.com/*"
+      ],
+      "css": [
+        "src/inject/inject.css"
+      ]
+    },
+    {
+      "matches": [
+        "https://www.google.com/*",
+        "https://www.google.nl/*"
+      ],
+      "js": [
+        "src/inject/inject.js"
+      ]
+    }
+  ]
+}

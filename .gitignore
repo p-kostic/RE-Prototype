@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Logs
 logs
 *.log
@@ -59,3 +60,9 @@ typings/
 
 # next.js build output
 .next
+=======
+# Created by .ignore support plugin (hsz.mobi)
+.idea
+*.iml
+.git
+>>>>>>> added boilerplate
