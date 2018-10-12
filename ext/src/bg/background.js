@@ -56,7 +56,7 @@ async function handleMessage(request, sender, sendResponse){
 //example of using a message handler from the inject scripts
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
-        handleMessage(request, sender).then(sendResponse);
+        handleMessage(request, sender, sendResponse);
         return true;
     }
 );
