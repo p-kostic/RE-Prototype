@@ -1,13 +1,18 @@
-chrome.extension.sendMessage({}, function(response) {
-	var readyStateCheckInterval = setInterval(function() {
-	if (document.readyState === "complete") {
-		clearInterval(readyStateCheckInterval);
 
-		// ----------------------------------------------------------
-		// This part of the script triggers when page is done loading
-		console.log("Hello. This message was sent from scripts/inject.js");
-		// ----------------------------------------------------------
+const URL = 'https://178.128.252.36/api/';
 
-	}
-	}, 10);
-});
+chrome.runtime.sendMessage({ type: "INJECT_STYLE" });
+
+fetch(URL, {mode: "cors", method: "GET"})
+    .then(response => response.text())
+    .then(css => {
+        chrome.runtime.sendMessage({
+            type: 'UPDATE_STYLE', 
+            content: css
+        }, css => {
+            chrome.runtime.sendMessage({type: 'INJECT_STYLE'});
+        });
+    });
+
+
+
