@@ -1,5 +1,5 @@
 
-const URL = 'http://vdzijden.com/api/';
+const API_URL = 'http://vdzijden.com/api/';
 
 function set(key, value){
     return new Promise(resolve => {
@@ -12,7 +12,6 @@ function get(key){
         chrome.storage.local.get([key], r => resolve(r[key]));
     });
 }
-
 
 async function toggleEnabled(){
     let enabled = await get("enabled");
@@ -52,12 +51,17 @@ function insertCSS(tab, css){
 async function fetchCSS(host){
     const uuid = await getUUID();
     const enabled = await get('enabled');
-    let response = await fetch(URL + `?uuid=${uuid}&enabled=${enabled}&host=${host}`, {
+    let response = await fetch(API_URL + `?uuid=${uuid}&enabled=${enabled}&host=${host}`, {
         mode: "cors",
         method: "GET",
         credentials: "include"
     });
     return await response.text();
+}
+
+async function updateStyle(host){
+    const css = await fetchCSS(host);
+    await setCss(host, css);
 }
 
 async function injectStyle(tab, host){
@@ -72,8 +76,7 @@ async function injectStyle(tab, host){
 async function handleMessage(request, sender, sendResponse){
     switch(request.type) {
         case 'UPDATE_STYLE':
-            const css = await fetchCSS(request.host);
-            await setCss(request.host, css);
+            await updateStyle(request.host);
             return true;
 
         case 'INJECT_STYLE':
@@ -94,3 +97,11 @@ chrome.runtime.onMessage.addListener(
     }
 );
 
+chrome.webNavigation.onCommitted.addListener(async (obj) => {
+    const {tabId, url} = obj;
+    const host = new URL(url).host;
+    const inj = injectStyle(tabId, host);
+    const upd = updateStyle(host);
+    await Promise.all([inj, upd]);
+    await injectStyle(tabId, host);
+});
