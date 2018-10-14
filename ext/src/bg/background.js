@@ -82,6 +82,9 @@ async function handleMessage(request, sender, sendResponse){
         case 'INJECT_STYLE':
             return await injectStyle(sender.tab.id, request.host);
 
+        case 'INJECT_STYLE_FOR_TAB':
+            return await injectStyle(request.tabId, request.host);
+
         case 'TOGGLE_STYLE':
             const response = await toggleEnabled();
             return response;
@@ -99,9 +102,17 @@ chrome.runtime.onMessage.addListener(
 
 chrome.webNavigation.onCommitted.addListener(async (obj) => {
     const {tabId, url} = obj;
-    const host = new URL(url).host;
+    const urlobj = new URL(url);
+    const host = urlobj.host;
+
+    if(urlobj.protocol.match('^https?') == null){
+        console.debug("Non-HTTP(S) site: ", url);
+        return;
+    }
+
     const inj = injectStyle(tabId, host);
     const upd = updateStyle(host);
     await Promise.all([inj, upd]);
     await injectStyle(tabId, host);
 });
+

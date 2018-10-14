@@ -1,0 +1,35 @@
+@import 'base';
+
+html:root {
+    #{--ic-brand-font-color-dark}: $fg-a!important;
+    #{--ic-link-color}: $fg-a!important;
+    #{--ic-brand-global-nav-bgd}: darken(#bc0031, 10%);
+    #{--ic-brand-global-nav-logo-bgd}: darken(#bc0031, 10%);
+}
+
+body {
+    background: $bg-1!important;
+    color: $fg-1!important;
+}
+
+.planner-day, .ic-Dashboard-header__layout, #breadcrumbs, .header-bar {
+    background: $bg-1!important;
+    color: $fg-1!important;
+
+}
+
+
+#nav-tray-portal > span > span {
+    background-color: $bg-2 !important;
+}
+
+.ic-app-header__menu-list-item.ic-app-header__menu-list-item--active .ic-app-header__menu-list-link {
+    background: $bg-2 !important;
+}
+
+.planner-item {
+    filter: brightness(3);
+}
+.tray-with-space-for-global-nav {
+    filter: contrast(0.5) brightness(2);
+}
