@@ -1,0 +1,57 @@
+@import "base";
+
+body:not(.page-dashboard){
+    background-color: $bg-1!important;
+    color: $fg-1!important;
+}
+
+
+body:not(.page-dashboard ){
+
+.repohead.experiment-repo-nav {
+    background-color: $bg-2!important;
+    color: $fg-1!important;
+}
+
+a {
+    color: $fg-a!important;
+}
+
+.readme .markdown-body, .readme .plain, .markdown-body {
+    background-color: $bg-1!important;
+    color: $fg-1!important;
+
+    pre {
+        background-color: $bg-1b!important;
+        color: $fg-1!important;
+    }
+}
+
+
+.commit-tease-contributors {
+    background-color: $bg-1!important;
+
+}
+
+.pl-smi, .pl-s .pl-s1 {
+    color: #ccc - $bg-1 !important ;
+}
+
+.pl-s, .pl-pds, .pl-s .pl-pse .pl-s1, .pl-sr, .pl-sr .pl-cce, .pl-sr .pl-sre, .pl-sr .pl-sra {
+    color: $fg-a !important;
+}
+
+.link-gray-dark{
+    color: $fg-2 !important;
+}
+
+.file-header, .commit-tease, .Box-header, .js-navigation-item,
+.navigation-focus, .reponav-item.selected, .table-list-header {
+    background-color: $bg-2 !important;
+}
+
+.Box {
+    background-color: transparent!important;
+}
+
+}
