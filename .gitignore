@@ -68,6 +68,7 @@ typings/
 api/jetty*
 api/out
 api/target
-
+jetty*
+*.css
 
 .*.swp

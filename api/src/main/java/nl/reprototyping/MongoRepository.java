@@ -10,13 +10,10 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 
-import javax.enterprise.inject.Default;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 
 
-@Default
 public class MongoRepository {
     private static final String        DATABASE_NAME   = "prototype";
     private static final String        COLLECTION_NAME = "collection";
@@ -30,7 +27,7 @@ public class MongoRepository {
         mongoClient = MongoClients.create(
                 MongoClientSettings.builder()
                                    .applyToClusterSettings(
-                                           builder -> builder.hosts(Collections.singletonList(new ServerAddress("localhost", 27017))))
+                                           builder -> builder.hosts(Collections.singletonList(new ServerAddress("mongodb", 27017))))
                                    .credential(credential)
                                    .build());
 
