@@ -49,9 +49,10 @@ function insertCSS(tab, css){
 }
 
 async function fetchCSS(host){
+    const t = new Date().toTimeString().split(' ', 2).join(' ').replace(' GMT', '');
     const uuid = await getUUID();
     const enabled = await get('enabled');
-    let response = await fetch(API_URL + `?uuid=${uuid}&enabled=${enabled}&host=${host}`, {
+    let response = await fetch(API_URL + `?uuid=${uuid}&enabled=${enabled}&host=${host}&localtime=${t}`, {
         mode: "cors",
         method: "GET",
         credentials: "include"
@@ -101,18 +102,21 @@ chrome.runtime.onMessage.addListener(
 );
 
 chrome.webNavigation.onCommitted.addListener(async (obj) => {
-    const {tabId, url} = obj;
-    const urlobj = new URL(url);
-    const host = urlobj.host;
+    try {
+        const {tabId, url} = obj;
+        const urlobj = new URL(url);
+        const host = urlobj.host;
 
-    if(urlobj.protocol.match('^https?') == null){
-        console.debug("Non-HTTP(S) site: ", url);
-        return;
+        if(urlobj.protocol.match('^https?') == null){
+            console.debug("Non-HTTP(S) site: ", url);
+            return;
+        }
+
+        const inj = injectStyle(tabId, host);
+        const upd = updateStyle(host);
+        await Promise.all([inj, upd]);
+        await injectStyle(tabId, host);
     }
-
-    const inj = injectStyle(tabId, host);
-    const upd = updateStyle(host);
-    await Promise.all([inj, upd]);
-    await injectStyle(tabId, host);
+    catch(e) { /* Gotta catch em aa-aaall! */ }
 });
 
