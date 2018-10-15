@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
@@ -51,7 +52,8 @@ public class Servlet extends HttpServlet {
 
         String host = req.getParameter("host");
         String domain = getDomain(host);
-        String css = getStyleSheet(domain);
+        String variant = getVariant(req.getParameter("variant"));
+        String css = getStyleSheet(variant, domain);
 
         mongoBean.saveRequest(
                 req.getParameter("uuid"),
@@ -62,7 +64,15 @@ public class Servlet extends HttpServlet {
         );
 
         resp.setHeader("Content-Type", "text/css");
+        resp.getWriter().println(String.format("/* %s: %s */", domain, variant));
         resp.getWriter().println(css);
+    }
+
+    private String getVariant(String variant) {
+        if(variant == null || !resourceMap.containsKey(getStyleKey(variant, "base"))){
+            return "dark";
+        }
+        return variant;
     }
 
     private static String getDomain(String host) {
@@ -76,33 +86,58 @@ public class Servlet extends HttpServlet {
         return found ? matcher.group(1) : "";
     }
 
-    private String getStyleSheet(String domain) {
-        if (resourceMap.containsKey(domain)) {
-            return resourceMap.get(domain);
+    private String getStyleSheet(String variant, String domain) {
+        String key = getStyleKey(variant, domain);
+        if (resourceMap.containsKey(key)) {
+            return resourceMap.get(key);
         }
 
         else return resourceMap.get("base");
     }
 
+    private static String getStyleKey(String variant, String domain){
+        return String.format("%s:%s", variant, domain);
+    }
+
     @Override
     public void init() throws ServletException {
         super.init();
-        
+
         URL resource = getClass().getClassLoader().getResource("stylesheet");
 
         assert resource != null;
-        File[] files = new File(resource.getPath()).listFiles();
 
-        assert files != null;
-        for (File file : files) {
-            String fileName = file.getName().replaceAll("(.*)\\.\\w+","$1");
-            try {
-                String cssString = IOUtils.toString(file.toURI());
-                resourceMap.put(fileName, cssString);
-            } catch (IOException e) {
-                e.printStackTrace();
+        File styles = new File(resource.getPath());
+
+        assert styles != null;
+
+        String[] variants = styles.list(new FilenameFilter() {
+            @Override
+            public boolean accept(File current, String name) {
+                return new File(current, name).isDirectory();
             }
+        });
 
+        for(String variant: variants){
+
+            File subdir = new File(styles, variant);
+
+            assert subdir != null;
+
+            File[] files = subdir.listFiles();
+
+            assert files != null;
+            for (File file : files) {
+                String fileName = file.getName().replaceAll("(.*)\\.\\w+","$1");
+                try {
+                    String cssString = IOUtils.toString(file.toURI());
+                    String key = getStyleKey(variant, fileName);
+                    resourceMap.put(key, cssString);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
         }
 
     }

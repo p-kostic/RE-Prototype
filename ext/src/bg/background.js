@@ -52,7 +52,8 @@ async function fetchCSS(host){
     const t = new Date().toTimeString().split(' ', 2).join(' ').replace(' GMT', '');
     const uuid = await getUUID();
     const enabled = await get('enabled');
-    let response = await fetch(API_URL + `?uuid=${uuid}&enabled=${enabled}&host=${host}&localtime=${t}`, {
+    const v = await get("variant");
+    let response = await fetch(API_URL + `?uuid=${uuid}&enabled=${enabled}&host=${host}&localtime=${t}&variant=${v}`, {
         mode: "cors",
         method: "GET",
         credentials: "include"
@@ -78,6 +79,10 @@ async function handleMessage(request, sender){
     switch(request.type) {
         case 'UPDATE_STYLE':
             await updateStyle(request.host);
+            return true;
+
+        case 'UPDATE_VARIANT':
+            await set("variant", request.variant);
             return true;
 
         case 'INJECT_STYLE':

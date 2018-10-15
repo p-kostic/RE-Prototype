@@ -2,7 +2,7 @@
   "name": "styles",
   "version": "1.0.0",
   "scripts": {
-    "build": "node-sass -r -o ../api/src/main/resources/stylesheet src/"
+    "build": "./build.sh"
   },
   "description": "",
   "author": "",

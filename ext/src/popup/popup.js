@@ -1,6 +1,8 @@
-const button = document.getElementById('toggleStyle')
+const button = document.getElementById('toggleStyle');
+const select = document.getElementById('variantSelect');
 
 chrome.storage.local.get('enabled', ({enabled}) => button.innerText = enabled ? "Disable" : "Enable");
+chrome.storage.local.get('variant', ({variant}) => select.value = variant);
 
 button.addEventListener('click', () => {
     chrome.runtime.sendMessage({type: 'TOGGLE_STYLE'}, enabled => {
@@ -24,3 +26,6 @@ button.addEventListener('click', () => {
     });
 });
 
+select.addEventListener('change', () => {
+    chrome.runtime.sendMessage({type: 'UPDATE_VARIANT', variant: select.value});
+});
