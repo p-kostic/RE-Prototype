@@ -1,5 +1,5 @@
 
-const API_URL = 'http://vdzijden.com/api/';
+const API_URL = 'http://localhost:8080/api/';
 
 function set(key, value){
     return new Promise(resolve => {
@@ -103,12 +103,16 @@ chrome.runtime.onMessage.addListener(
 
 chrome.webNavigation.onCommitted.addListener(async (obj) => {
     try {
-        const {tabId, url} = obj;
+        const {tabId, url, transitionType} = obj;
         const urlobj = new URL(url);
         const host = urlobj.host;
 
         if(urlobj.protocol.match('^https?') == null){
             console.debug("Non-HTTP(S) site: ", url);
+            return;
+        }
+
+        if (transitionType === "auto_subframe") {
             return;
         }
 

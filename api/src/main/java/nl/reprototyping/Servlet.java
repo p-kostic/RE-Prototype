@@ -47,6 +47,8 @@ public class Servlet extends HttpServlet {
             resp.setHeader("Set-Cookie", "uuid=" + uuid);
         }
 
+        resp.setHeader("Cache-Control", "max-age=3600");
+
         String host = req.getParameter("host");
         String domain = getDomain(host);
         String css = getStyleSheet(domain);
