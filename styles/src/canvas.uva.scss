@@ -28,8 +28,8 @@ body {
 }
 
 .planner-item {
-    filter: brightness(3);
+    filter: brightness(1 + 2 * $extra_contrast);
 }
 .tray-with-space-for-global-nav {
-    filter: contrast(0.5) brightness(2);
+    filter: contrast(1  - 0.5 * $extra_contrast) brightness(1 + $extra_contrast);
 }
