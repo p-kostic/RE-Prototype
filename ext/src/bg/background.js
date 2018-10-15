@@ -74,7 +74,7 @@ async function injectStyle(tab, host){
     return false;
 }
 
-async function handleMessage(request, sender, sendResponse){
+async function handleMessage(request, sender){
     switch(request.type) {
         case 'UPDATE_STYLE':
             await updateStyle(request.host);
@@ -96,7 +96,8 @@ chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
         console.debug("Received message: ", {request, sender});
         handleMessage(request, sender)
-            .then(response => { sendResponse(response); });
+            .then(response => { sendResponse(response); })
+            .catch(e => {console.log(e)});
         return true;
     }
 );
@@ -107,8 +108,7 @@ chrome.webNavigation.onCommitted.addListener(async (obj) => {
         const urlobj = new URL(url);
         const host = urlobj.host;
 
-        if(urlobj.protocol.match('^https?') == null){
-            console.debug("Non-HTTP(S) site: ", url);
+        if(urlobj.protocol.match(/^https?/) == null){
             return;
         }
 

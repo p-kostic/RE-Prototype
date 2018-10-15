@@ -9,6 +9,9 @@ button.addEventListener('click', () => {
         if(enabled){
             chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
                 var currTab = tabs[0];
+                if(currTab.url.match(/^https?:/) == null){
+                    return;
+                }
                 if (currTab) {
                     const tabId = currTab.id;
                     const host = new URL(currTab.url).host;
