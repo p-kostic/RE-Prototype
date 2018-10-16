@@ -13,10 +13,7 @@
         </init-param>
     </filter>
 
-    <servlet-mapping>
-        <servlet-name>default</servlet-name>
-        <url-pattern>/css/*</url-pattern>
-    </servlet-mapping>
+
 
     <filter-mapping>
         <filter-name>app</filter-name>
@@ -32,6 +29,6 @@
         <filter-name>app</filter-name>
         <url-pattern>/api/*</url-pattern>
     </filter-mapping>
-    
+
 
 </web-app>

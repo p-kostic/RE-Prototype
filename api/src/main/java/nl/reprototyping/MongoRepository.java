@@ -10,21 +10,23 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 
+import javax.ejb.Singleton;
+import javax.ejb.Stateful;
 import java.util.Collections;
 import java.util.Date;
 
-
+@Singleton
 public class MongoRepository {
-    private static final String DATABASE_NAME = "prototype";
+    private static final String        DATABASE_NAME   = "prototype";
     private static final String        COLLECTION_NAME = "collection";
-    public static final String HOST = "mongodb";
-    public static final int PORT = 27017;
+    private static final String        HOST            = "mongodb";
+    private static final int           PORT            = 27017;
     private              MongoClient   mongoClient;
     private              MongoDatabase database;
 
     public MongoRepository() {
         MongoCredential credential = MongoCredential.createCredential(
-                "vincent", "prototype", "vincent".toCharArray());
+                "vincent", "admin", "GeR7gnqjQYw5a5s3".toCharArray());
 
         mongoClient = MongoClients.create(
                 MongoClientSettings.builder()

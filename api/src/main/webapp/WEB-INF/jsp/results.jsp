@@ -1,6 +1,7 @@
+<%--suppress XmlPathReference --%>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%--<jsp:useBean id="it" class="nl.reprototyping.model.ResultsModel" scope="request"/>--%>
+
 <html>
 <link rel="stylesheet" href="/css/style.css"/>
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
@@ -9,9 +10,10 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
         crossorigin="anonymous"></script>
 <head>
-    <title>Title</title>
+    <title>Search</title>
 </head>
-<body class="<%= request.getParameter("theme")%>">
+
+<body class="${model.theme}}">
 <div class="container">
     <form class="" action="${pageContext.request.contextPath}/results" method="get">
         <div class="mb-3 mt-3 btn-group btn-group-toggle float-sm-right">
@@ -30,7 +32,7 @@
         </div>
     </form>
     <div class="list-group">
-        <c:forEach items="${it.results}" var="webPage">
+        <c:forEach items="${model.results}" var="webPage">
             <a href="${webPage.url}" class="list-group-item list-group-item-action border-0 pl-0  flex-column align-items-start">
                 <div class="d-flex w-100 justify-content-between">
                     <h5 class="mb-1">${webPage.name}</h5>
@@ -42,7 +44,7 @@
     </div>
     <nav aria-label="Page navigation example">
         <ul class="pagination">
-            <c:forEach var="i" begin="0" end="${it.totalSize / it.pageSize}">
+            <c:forEach var="i" begin="0" end="${model.totalSize / model.pageSize}">
             <li class="page-item <c:choose><c:when test="${param.page.equals(i.toString())}">disabled</c:when></c:choose>">
                 <a class="page-link" href="<c:url value="/results">
  <c:param name="page" value="${i}"/>

@@ -4,6 +4,8 @@ package nl.reprototyping.servlet;
 import nl.reprototyping.MongoRepository;
 import org.apache.commons.io.IOUtils;
 
+import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -20,8 +22,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Path("/api")
+@Stateless
 public class Servlet {
-    private final MongoRepository     mongoBean   = new MongoRepository();
+    @Inject
+    private MongoRepository     mongoBean;
     public static final String ALLOW_ORIGIN = "Access-Control-Allow-Origin";
     private final Map<String, String> resourceMap = new HashMap<>();
 
