@@ -1,5 +1,22 @@
 
-const API_URL = 'http://localhost:8080/api/';
+const API_URL = 'http://vdzijden.com/api/';
+
+const SECONDS = 1000;
+const MINUTES = 60 * SECONDS;
+const HOURS = 60 * MINUTES;
+
+
+const PROMPT_RATE = 1/1;
+
+const prompts = [];
+
+function timeout(n){
+    new Promise((resolve, reject) => setTimeout(() => reject(), n));
+}
+
+async function sendMessage(message){
+    return await handleMessage(message);
+}
 
 function set(key, value){
     return new Promise(resolve => {
@@ -13,9 +30,17 @@ function get(key){
     });
 }
 
-async function toggleEnabled(){
+async function getEnabled(){
     let enabled = await get("enabled");
-    enabled = enabled == null || !enabled;
+    if(enabled == null){
+        await set("enabled", true);
+        return await get("enabled");
+    }
+    return enabled;
+}
+
+async function toggleEnabled(){
+    let enabled = !(await getEnabled());
     await set("enabled", enabled);
     return enabled;
 }
@@ -51,19 +76,26 @@ function insertCSS(tab, css){
 async function fetchCSS(host){
     const t = new Date().toTimeString().split(' ', 2).join(' ').replace(' GMT', '');
     const uuid = await getUUID();
-    const enabled = await get('enabled');
+    const enabled = await getEnabled();
     const v = await get("variant");
     let response = await fetch(API_URL + `?uuid=${uuid}&enabled=${enabled}&host=${host}&localtime=${t}&variant=${v}`, {
         mode: "cors",
-        method: "GET",
-        credentials: "include"
+        method: "GET"
     });
+    if(response.status >= 400){
+        throw new Error(response.statusText);
+    }
     return await response.text();
 }
 
 async function updateStyle(host){
-    const css = await fetchCSS(host);
-    await setCss(host, css);
+    try {
+        const css = await fetchCSS(host);
+        await setCss(host, css);
+    }
+    catch(e) {
+        console.warn(e);
+    }
 }
 
 async function injectStyle(tab, host){
@@ -74,8 +106,75 @@ async function injectStyle(tab, host){
     }
     return false;
 }
+function getTab(tabId) {
+    return new Promise(resolve => {
+        chrome.tabs.get(tabId, r => resolve(r));
+    });
+
+}
+function getWindow(windowId){
+    return new Promise(resolve => {
+        chrome.windows.get(windowId, r => resolve(r));
+    });
+}
+
+
+function dismissAllPrompts(prompts_){
+    prompts_ = prompts_ == null ? prompts : prompts_;
+    while(prompts_.length > 0){
+        try{
+            chrome.windows.remove(prompts_.pop());
+        } catch(e) {console.log(e)};
+    }
+}
+
+async function hasDomain(host){
+    return (await getCss(host)) != null;
+}
+
+async function feedbackPrompt(parentWindowId, host){
+    const timeout = await get('timeout');
+    if(timeout == null){
+        await set("timeout", 5);
+        return;
+    }
+    const enabled = await getEnabled();
+
+    const exists = await hasDomain(host);
+    if(!exists) {
+        console.log("Not exists: ", host)
+        return;
+    }
+    if(timeout > 0 || !enabled){
+        await set('timeout', timeout - 1);
+        return;
+    }
+    dismissAllPrompts(Array.from(prompts));
+    console.log(parentWindowId);
+    const parentWin = await getWindow(parentWindowId);
+    console.log(parentWin);
+    const centerX = (parentWin.left + parentWin.width / 2);
+    const centerY = (parentWin.top + parentWin.height / 2);
+    const w = 450;
+    const h = 550;
+    chrome.windows.create(
+        {
+            url: 'src/fb/fb.html',
+            type: 'popup',
+            focused: true,
+            width: w | 0,
+            height: h | 0,
+            left: (centerX - w / 2) | 0,
+            top: (centerY - h / 2) | 0,
+        },
+        function(window) {
+            sendMessage({type: "REGISTER_PROMPT", windowId: window.id});
+        }
+    );
+}
 
 async function handleMessage(request, sender){
+    console.log("Received message: ", {request, sender});
     switch(request.type) {
         case 'UPDATE_STYLE':
             await updateStyle(request.host);
@@ -92,10 +191,43 @@ async function handleMessage(request, sender){
             return await injectStyle(request.tabId, request.host);
 
         case 'TOGGLE_STYLE':
-            const response = await toggleEnabled();
-            return response;
+            return await toggleEnabled();
+
+        case 'FEEDBACK_PROMPT':
+            return await feedbackPrompt(request.windowId, request.host);
+
+        case 'PROMPT_FORM_SUBMITTED':
+            await set('timeout', (25 + Math.random() * 25) | 0);
+            dismissAllPrompts();
+            return true;
+
+        case 'PROMPT_DISMISS':
+            {
+                const curTimeout = await get('timeout');
+                await set('timeout', Math.max(curTimeout, 15));
+            }
+            return dismissAllPrompts();
+
+        case 'REGISTER_PROMPT':
+            prompts.push(request.windowId)
+            return true;
     }
 }
+
+chrome.windows.onFocusChanged.addListener(windowId => {
+    return;
+    const dels = [];
+    for(let [promptId, details] of Object.entries(prompts)){
+        const lifetime = Date.now() - details.registered_at;
+        if(promptId !== windowId && !details.userInterest && lifetime >= 1000){
+            chrome.windows.remove(promptId|0);
+            dels.push(promptId);
+        }
+    }
+    for(let del of dels){
+        delete prompts[del];
+    }
+});
 
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
@@ -103,7 +235,7 @@ chrome.runtime.onMessage.addListener(
         handleMessage(request, sender)
             .then(response => { sendResponse(response); })
             .catch(e => {console.log(e)});
-        return true;
+        return true;a
     }
 );
 
@@ -121,11 +253,38 @@ chrome.webNavigation.onCommitted.addListener(async (obj) => {
             return;
         }
 
-        const inj = injectStyle(tabId, host);
-        const upd = updateStyle(host);
-        await Promise.all([inj, upd]);
-        await injectStyle(tabId, host);
+        const ms = [
+            sendMessage({
+                type: "INJECT_STYLE_FOR_TAB",
+                tabId,
+                host
+            }),
+            sendMessage({
+                type: "UPDATE_STYLE",
+                host
+            })
+        ];
+
+        if(Math.random() < PROMPT_RATE){
+            const windowId = (await getTab(tabId)).windowId;
+            await sendMessage({
+                type: "FEEDBACK_PROMPT",
+                windowId,
+                host
+            });
+        }
+
+        await Promise.all(ms);
+        await sendMessage({
+            type: "INJECT_STYLE_FOR_TAB",
+            tabId,
+            host
+        });
+
     }
-    catch(e) { /* Gotta catch em aa-aaall! */ }
+    catch(e) {
+        console.error(e);
+        /* Gotta catch em aa-aaall! */
+    }
 });
 

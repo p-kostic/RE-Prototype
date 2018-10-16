@@ -21,9 +21,7 @@
     "tabs",
     "storage",
     "webNavigation",
-    "https://*/*",
-    "http://*/*",
-    "https://*/",
-    "http://*/"
+    "activeTab",
+    "https://*/*"
   ]
 }

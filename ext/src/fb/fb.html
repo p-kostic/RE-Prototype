@@ -1,0 +1,129 @@
+<html>
+    <meta charset="utf-8">
+<head>
+<style>
+
+h2, h3 {
+    margin-bottom: 0;
+}
+
+.actionGroup {
+    margin: 1em 0;
+}
+.actionSubGroup{
+    display: flex;
+    margin: 0.5em;
+    justify-content: center;
+}
+
+.item {
+    width: 30px;
+    height: 30px;
+    margin: 0em 0.5em;
+    font-size: 25px;
+}
+
+.button-primary {
+    width: 150px;
+    height: 30px;
+}
+
+.emoji {
+    font-family: apple color emoji, segoe ui emoji, notocoloremoji;
+}
+
+textarea {
+    width: 60%;
+}
+
+body.dark {
+    background-color: rgb(50, 50, 50);
+    color: rgb(205, 205, 205);
+}
+
+.dark a {
+    color: rgb(105, 125, 205);
+}
+
+body.light {
+    background-color: rgb(255, 241, 224);
+}
+
+body {
+    outline: inset 5px solid black;
+    padding: 0.2em;
+}
+
+</style>
+
+</head>
+<body class="fade">
+
+<form action="http://vdzijden.com/api/submit" method="post">
+<input type="hidden" name="reason" value="prompt">
+<div class="actionSubGroup"><h2>A few questions...</h2></div>
+<div class="actionGroup">
+<div class="actionSubGroup">
+<h3>How strained are your eyes right now?</h3>
+</div>
+<div class="actionSubGroup">
+    <div class="item"><span class="emoji">😖</span></div>
+    <div class="item"></div>
+    <div class="item"></div>
+    <div class="item"></div>
+    <div class="item"><span class="emoji">😃</span></div>
+</div>
+<div class="actionSubGroup">
+    <input type="radio" name="strain" class="item" value=1 required data-text="Exhausted">
+    <input type="radio" name="strain" class="item" value=2 required data-text="Somewhat strained">
+    <input type="radio" name="strain" class="item" value=3 required data-text="Neutral">
+    <input type="radio" name="strain" class="item" value=4 required data-text="Ok">
+    <input type="radio" name="strain" class="item" value=5 required data-text="Comfortable">
+</div>
+
+<div class="actionSubGroup">
+    <span data-form-field="strain">&nbsp;</span>
+</div>
+</div>
+<div class="actionGroup">
+
+<div class="actionSubGroup">
+<h3>How bright is your environment right now?</h3>
+</div>
+<div class="actionSubGroup">
+    <div class="item"><span class="emoji">🌑</span></div>
+    <div class="item"></div>
+    <div class="item"></div>
+    <div class="item"></div>
+    <div class="item"><span class="emoji">💡</span></div>
+</div>
+<div class="actionSubGroup">
+    <input type="radio" name="environlight" class="item" value=1 required data-text="Pitch black">
+    <input type="radio" name="environlight" class="item" value=2 required data-text="Dark">
+    <input type="radio" name="environlight" class="item" value=3 required data-text="Moderate light">
+    <input type="radio" name="environlight" class="item" value=4 required data-text="Well lit">
+    <input type="radio" name="environlight" class="item" value=5 required data-text="Daylight/Brightly lit room">
+</div>
+<div class="actionSubGroup">
+    <span data-form-field="environlight">&nbsp;</span>
+</div>
+
+</div>
+<div class="actionGroup">
+<div class="actionSubGroup">
+    <textarea name="message" placeholder="Additional feedback..." rows=5></textarea>
+</div>
+<div class="actionSubGroup">
+    <input type="submit" value="Submit" class="button-primary">
+</div>
+</div>
+<div class="actionGroup">
+<div class="actionSubGroup">
+<a href="#" id="dismiss">Not right now.</button>
+</div>
+</div>
+</form>
+<script src="fb.js"></script>
+</body>
+</html>
+
