@@ -28,7 +28,7 @@ public class StatsFilter implements ContainerRequestFilter {
         Cookie uuidCookie = requestContext.getCookies().get("uuid");
         Cookie disabledCookie = requestContext.getCookies().get("disabled");
         mongoRepository.saveRequest(uuidCookie != null ? uuidCookie.getValue() : null,
-                                    queryParameters.getFirst("domain"), new Date(),
+                                    queryParameters.getFirst("host"), new Date(),
                                     theme,
                                     queryParameters.getFirst("enabled"),
                                     disabledCookie != null ? disabledCookie.getValue() : null);
