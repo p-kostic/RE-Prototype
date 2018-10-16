@@ -1,0 +1,41 @@
+@import "bootstrap/bootstrap";
+
+body.light {
+  .list-group-item {
+    .result_link {
+      color: $green
+    }
+  }
+}
+
+  body.dark {
+    background-color: $dark;
+
+    input[type="text"] {
+      background-color: $gray-600;
+      color: #fff;
+    }
+
+    .input-group-append button {
+      @extend .btn-outline-light
+    }
+
+    .list-group-item {
+      background-color: transparent;
+      color: #fff;
+
+      .result_link {
+        color: $blue;
+      }
+    }
+
+    #btn--light {
+      @extend .btn-outline-light
+    }
+
+    #btn--dark {
+      @extend .btn-light
+    }
+
+
+  }

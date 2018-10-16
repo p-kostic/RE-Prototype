@@ -70,5 +70,6 @@ api/out
 api/target
 jetty*
 *.css
-
+apache-tomee*
+**/bootstrap
 .*.swp

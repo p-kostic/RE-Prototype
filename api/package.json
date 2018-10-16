@@ -1,0 +1,13 @@
+{
+  "name": "styles",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "node-sass -o src/main/webapp/css src/main/scss/style.scss"
+  },
+  "description": "",
+  "author": "",
+  "devDependencies": {
+    "node-sass": "^4.9.3"
+  },
+  "dependencies": {}
+}

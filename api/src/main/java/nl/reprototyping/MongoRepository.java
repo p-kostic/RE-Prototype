@@ -15,10 +15,10 @@ import java.util.Date;
 
 
 public class MongoRepository {
-    private static final String        DATABASE_NAME   = "prototype";
+    private static final String DATABASE_NAME = "prototype";
     private static final String        COLLECTION_NAME = "collection";
-    public static final  String        MONGODB         = "localhost";
-    public static final  int           PORT            = 27017;
+    public static final String HOST = "mongodb";
+    public static final int PORT = 27017;
     private              MongoClient   mongoClient;
     private              MongoDatabase database;
 
@@ -29,7 +29,7 @@ public class MongoRepository {
         mongoClient = MongoClients.create(
                 MongoClientSettings.builder()
                                    .applyToClusterSettings(
-                                           builder -> builder.hosts(Collections.singletonList(new ServerAddress(MONGODB, PORT))))
+                                           builder -> builder.hosts(Collections.singletonList(new ServerAddress(HOST, PORT))))
                                    .credential(credential)
                                    .build());
 

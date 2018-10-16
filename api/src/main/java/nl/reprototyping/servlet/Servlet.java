@@ -1,71 +1,46 @@
-package nl.reprototyping;
+package nl.reprototyping.servlet;
 
 
+import nl.reprototyping.MongoRepository;
 import org.apache.commons.io.IOUtils;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
-public class Servlet extends HttpServlet {
-    private static final String UUID_COOKIE_NAME = "uuid";
-
-    private final MongoRepository mongoBean = new MongoRepository();
+@Path("/api")
+public class Servlet {
+    private final MongoRepository     mongoBean   = new MongoRepository();
+    public static final String ALLOW_ORIGIN = "Access-Control-Allow-Origin";
     private final Map<String, String> resourceMap = new HashMap<>();
 
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        Cookie[] cookies = req.getCookies();
-
-        String uuid = null;
-        if (cookies != null) {
-            Optional<String> optionalUUID = Arrays.stream(cookies)
-                                                  .filter(cookie -> cookie.getName().equals(UUID_COOKIE_NAME))
-                                                  .map(Cookie::getValue)
-                                                  .findFirst();
-            if (optionalUUID.isPresent()) {
-                uuid = optionalUUID.get();
-            }
-        }
-
-        if (uuid == null) {
-            uuid = UUID.randomUUID().toString();
-            resp.setHeader("Set-Cookie", "uuid=" + uuid);
-        }
-
-        resp.setHeader("Cache-Control", "max-age=3600");
-
-        String host = req.getParameter("host");
+    @GET
+    @Produces("text/css")
+    public Response doGet(@QueryParam("uuid") String uuid, @QueryParam("variant") String variant,
+                          @QueryParam("host") String host, @QueryParam("enabled") String enabled) {
         String domain = getDomain(host);
-        String variant = getVariant(req.getParameter("variant"));
-        String css = getStyleSheet(variant, domain);
+        String css = getStyleSheet(getVariant(variant), domain);
 
         mongoBean.saveRequest(
-                req.getParameter("uuid"),
-                req.getParameter("host"),
+                uuid,
+                host,
                 new Date(),
                 "",
-                req.getParameter("enabled")
+                enabled
         );
 
-        resp.setHeader("Content-Type", "text/css");
-        resp.getWriter().println(String.format("/* %s: %s */", domain, variant));
-        resp.getWriter().println(css);
+        return Response.ok(css).header(ALLOW_ORIGIN, "*").build();
     }
 
     private String getVariant(String variant) {
@@ -99,10 +74,7 @@ public class Servlet extends HttpServlet {
         return String.format("%s:%s", variant, domain);
     }
 
-    @Override
-    public void init() throws ServletException {
-        super.init();
-
+    public Servlet() {
         URL resource = getClass().getClassLoader().getResource("stylesheet");
 
         assert resource != null;
@@ -139,6 +111,5 @@ public class Servlet extends HttpServlet {
 
             }
         }
-
     }
 }
