@@ -15,8 +15,10 @@
 <div class="container d-flex h-100">
     <form class="align-self-center col-sm-12" action="${pageContext.request.contextPath}/results" method="get">
         <div class="mb-3 mt-3 btn-group btn-group-toggle float-sm-right">
-            <button id="btn--light" type="radio" name="theme" value="light" class="btn btn-dark">Light</button>
-            <button id="btn--dark" type="radio" name="theme" value="dark" class="btn btn-outline-dark">Dark</button>
+            <button id="btn--light" type="radio" name="theme" value="light" class="btn btn-dark"
+                    <c:if test="${param.theme.equals(\"light\")}">checked</c:if>> Light</button>
+            <button id="btn--dark" type="radio" name="theme" value="dark" class="btn btn-outline-dark"
+                    <c:if test="${param.theme.equals(\"dark\")}">checked</c:if>>Dark</button>
 
         </div>
         <div class="form-group">

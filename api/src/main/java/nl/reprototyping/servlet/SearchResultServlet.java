@@ -6,6 +6,7 @@ import com.google.common.cache.CacheBuilder;
 import nl.reprototyping.bing.BingSearch;
 import nl.reprototyping.bing.SearchResults;
 import nl.reprototyping.bing.WebPage;
+import nl.reprototyping.bing.WebPages;
 import nl.reprototyping.util.Theme;
 import nl.reprototyping.util.ThemeService;
 import org.glassfish.jersey.server.mvc.Viewable;
@@ -68,16 +69,19 @@ public class SearchResultServlet {
                 cache.put(query, results);
             }
 
-            List<WebPage> webPages = results.getWebPages().getValue();
-            int offset = page * PAGE_SIZE;
-            int lastIndex = webPages.size() - 1;
-            int endIndex = offset + PAGE_SIZE;
-            webPages = webPages.subList(offset, endIndex < lastIndex ? endIndex : lastIndex);
-            model.put("results", webPages);
-            model.put("totalSize", lastIndex);
-            model.put("pageSize", endIndex);
+            WebPages resultsWebPages = results.getWebPages();
+            if (resultsWebPages != null) {
+                List<WebPage> webPages = resultsWebPages.getValue();
+                int offset = page * PAGE_SIZE;
+                int lastIndex = webPages.size() - 1;
+                int endIndex = offset + PAGE_SIZE;
+                webPages = webPages.subList(offset, endIndex < lastIndex ? endIndex : lastIndex);
+                model.put("results", webPages);
+                model.put("totalSize", lastIndex);
+                model.put("pageSize", endIndex);
 
-            return builder.entity(new Viewable("/results.jsp", model)).build();
+                return builder.entity(new Viewable("/results.jsp", model)).build();
+            }
         }
 
         return builder.entity(new Viewable("/search.jsp", model)).build();
