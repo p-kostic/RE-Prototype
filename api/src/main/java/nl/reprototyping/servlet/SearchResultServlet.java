@@ -19,6 +19,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
 import java.util.List;
@@ -26,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 
 
 @Stateless
-@Path("/")
+@Path("")
 public class SearchResultServlet {
     @Inject
     ThemeService themeService;
@@ -46,15 +47,17 @@ public class SearchResultServlet {
     @GET
     @Produces(MediaType.TEXT_HTML)
     public Response get(@QueryParam("query") String query, @QueryParam("page") int page,
-                        @CookieParam("theme") String themeCookie) throws Exception {
+                        @QueryParam("theme") String themeParam) throws Exception {
 
         HashMap<String, Object> model = new HashMap<>();
-        if (themeCookie == null) {
+        Response.ResponseBuilder builder = Response.ok();
+        if (themeParam != null) {
+            model.put("theme", themeParam);
+        } else {
             Theme theme = themeService.getTheme();
             model.put("theme", theme);
         }
 
-        Response.ResponseBuilder builder = Response.ok();
         if (query != null && !query.equals("")) {
             SearchResults results;
             SearchResults cacheResultOrNull = cache.getIfPresent(query);
@@ -82,7 +85,20 @@ public class SearchResultServlet {
 
     @GET
     @Produces(MediaType.TEXT_HTML)
-    public Viewable get(@QueryParam("theme") String theme) throws Exception {
-        return new Viewable("/search.jsp");
+    public Response get(@QueryParam("theme") String themeParam) {
+        HashMap<String, Object> model = new HashMap<>();
+        Response.ResponseBuilder builder = Response.ok();
+        if (themeParam != null) {
+            model.put("theme", themeParam);
+        } else {
+            Theme theme = themeService.getTheme();
+            model.put("theme", theme);
+        }
+        return Response.ok(new Viewable("/search.jsp", model)).build();
+    }
+
+
+    private static NewCookie themeCookie(String theme) {
+        return new NewCookie("theme", theme, "/", null, null, 3400, false);
     }
 }

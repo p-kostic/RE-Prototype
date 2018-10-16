@@ -16,6 +16,10 @@ body.light {
       color: #fff;
     }
 
+    input[type="text"]::-webkit-input-placeholder {
+      color: #fff;
+    }
+
     .input-group-append button {
       @extend .btn-outline-light
     }

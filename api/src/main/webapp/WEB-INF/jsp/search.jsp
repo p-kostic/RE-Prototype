@@ -11,7 +11,7 @@
 <head>
     <title>Title</title>
 </head>
-<body class="<%= request.getParameter("theme")%>">
+<body class="${model.theme.toString()}">
 <div class="container d-flex h-100">
     <form class="align-self-center col-sm-12" action="${pageContext.request.contextPath}/results" method="get">
         <div class="mb-3 mt-3 btn-group btn-group-toggle float-sm-right">

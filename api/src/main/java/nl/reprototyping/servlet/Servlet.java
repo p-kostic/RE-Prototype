@@ -1,11 +1,10 @@
 package nl.reprototyping.servlet;
 
 
-import nl.reprototyping.MongoRepository;
 import org.apache.commons.io.IOUtils;
 
 import javax.ejb.Stateless;
-import javax.inject.Inject;
+import javax.ws.rs.CookieParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -15,44 +14,40 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
 @Path("/api")
 @Stateless
 public class Servlet {
-    @Inject
-    private MongoRepository     mongoBean;
-    public static final String ALLOW_ORIGIN = "Access-Control-Allow-Origin";
-    private final Map<String, String> resourceMap = new HashMap<>();
+    public static final String              ALLOW_ORIGIN = "Access-Control-Allow-Origin";
+    private final       Map<String, String> resourceMap  = new HashMap<>();
 
     @GET
     @Produces("text/css")
     public Response doGet(@QueryParam("uuid") String uuid, @QueryParam("variant") String variant,
-                          @QueryParam("host") String host, @QueryParam("enabled") String enabled) {
+                          @QueryParam("host") String host, @QueryParam("enabled") String enabled,
+                          @CookieParam("disabled") String disabled) {
         String domain = getDomain(host);
 
-        String css = getStyleSheet(getVariant(variant), domain);
+
+        String css = null;
+        if (disabled == null) {
+            css = getStyleSheet(getVariant(variant), domain);
+        }
         if (css == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
 
-        mongoBean.saveRequest(
-                uuid,
-                host,
-                new Date(),
-                "",
-                enabled
-        );
-
-        return Response.ok(css).header(ALLOW_ORIGIN, "*").build();
+        Response.ResponseBuilder ok = Response.ok(css);
+        return ok.header(ALLOW_ORIGIN, "*").build();
     }
 
     private String getVariant(String variant) {
-        if(variant == null || !resourceMap.containsKey(getStyleKey(variant, "base"))){
+        if (variant == null || !resourceMap.containsKey(getStyleKey(variant, "base"))) {
             return "dark";
         }
         return variant;
@@ -73,12 +68,12 @@ public class Servlet {
         String key = getStyleKey(variant, domain);
         if (resourceMap.containsKey(key)) {
             return resourceMap.get(key);
+        } else {
+            return null;
         }
-
-        else return null;
     }
 
-    private static String getStyleKey(String variant, String domain){
+    private static String getStyleKey(String variant, String domain) {
         return String.format("%s:%s", variant, domain);
     }
 
@@ -98,7 +93,7 @@ public class Servlet {
             }
         });
 
-        for(String variant: variants){
+        for (String variant : variants) {
 
             File subdir = new File(styles, variant);
 
@@ -108,7 +103,7 @@ public class Servlet {
 
             assert files != null;
             for (File file : files) {
-                String fileName = file.getName().replaceAll("(.*)\\.\\w+","$1");
+                String fileName = file.getName().replaceAll("(.*)\\.\\w+", "$1");
                 try {
                     String cssString = IOUtils.toString(file.toURI());
                     String key = getStyleKey(variant, fileName);
@@ -116,7 +111,6 @@ public class Servlet {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
             }
         }
     }

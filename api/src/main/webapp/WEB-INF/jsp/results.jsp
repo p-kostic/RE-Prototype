@@ -13,7 +13,7 @@
     <title>Search</title>
 </head>
 
-<body class="${model.theme}}">
+<body class="${model.theme}">
 <div class="container">
     <form class="" action="${pageContext.request.contextPath}/results" method="get">
         <div class="mb-3 mt-3 btn-group btn-group-toggle float-sm-right">

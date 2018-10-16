@@ -12,4 +12,9 @@ public class Theme {
         this.theme = theme;
         this.name = name;
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }
