@@ -30,7 +30,11 @@ public class Servlet {
     public Response doGet(@QueryParam("uuid") String uuid, @QueryParam("variant") String variant,
                           @QueryParam("host") String host, @QueryParam("enabled") String enabled) {
         String domain = getDomain(host);
+
         String css = getStyleSheet(getVariant(variant), domain);
+        if (css == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
 
         mongoBean.saveRequest(
                 uuid,
@@ -67,7 +71,7 @@ public class Servlet {
             return resourceMap.get(key);
         }
 
-        else return resourceMap.get("base");
+        else return null;
     }
 
     private static String getStyleKey(String variant, String domain){

@@ -25,6 +25,11 @@
 
     <filter-mapping>
         <filter-name>app</filter-name>
+        <url-pattern>/results</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>app</filter-name>
         <url-pattern>/api/*</url-pattern>
     </filter-mapping>
     

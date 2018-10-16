@@ -12,8 +12,8 @@
     <title>Title</title>
 </head>
 <body class="<%= request.getParameter("theme")%>">
-<div class="container d-flex h-100">
-    <form class="align-self-center col-sm-12" action="${pageContext.request.contextPath}/results" method="get">
+<div class="container">
+    <form class="" action="${pageContext.request.contextPath}/results" method="get">
         <div class="mb-3 mt-3 btn-group btn-group-toggle float-sm-right">
             <button id="btn--light" type="radio" name="theme" value="light" class="btn btn-dark">Light</button>
             <button id="btn--dark" type="radio" name="theme" value="dark" class="btn btn-outline-dark">Dark</button>
@@ -21,13 +21,38 @@
         </div>
         <div class="form-group">
             <div class="input-group">
-                <input class="form-control" type="text" name="query" placeholder="Zoeken">
+                <input class="form-control" type="text" name="query" placeholder="Zoeken"
+                       value="<%= request.getParameter("query") != null ? request.getParameter("query") : ""  %>">
                 <div class="input-group-append">
                     <button type="submit" class="btn btn-primary">Search</button>
                 </div>
             </div>
         </div>
     </form>
+    <div class="list-group">
+        <c:forEach items="${it.results}" var="webPage">
+            <a href="${webPage.url}" class="list-group-item list-group-item-action border-0 pl-0  flex-column align-items-start">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">${webPage.name}</h5>
+                </div>
+                <p class="m-0 result_link">${webPage.url}</p>
+                <p class="mb-1">${webPage.snippet}</p>
+            </a>
+        </c:forEach>
+    </div>
+    <nav aria-label="Page navigation example">
+        <ul class="pagination">
+            <c:forEach var="i" begin="0" end="${it.totalSize / it.pageSize}">
+            <li class="page-item <c:choose><c:when test="${param.page.equals(i.toString())}">disabled</c:when></c:choose>">
+                <a class="page-link" href="<c:url value="/results">
+ <c:param name="page" value="${i}"/>
+ <c:param name="query" value="${param.query}"/>
+ <c:param name="theme" value="${param.theme}"/>
+ />
+</c:url>" tabindex="-1">${i + 1}</a>
+                </c:forEach>
+        </ul>
+    </nav>
 </div>
 
 </body>
