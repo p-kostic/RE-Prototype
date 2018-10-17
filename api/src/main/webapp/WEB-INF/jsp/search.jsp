@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%--<jsp:useBean id="it" class="nl.reprototyping.model.ResultsModel" scope="request"/>--%>
@@ -12,25 +13,41 @@
     <title>Title</title>
 </head>
 <body class="${model.theme.toString()}">
-<div class="container d-flex h-100">
-    <form class="align-self-center col-sm-12" action="${pageContext.request.contextPath}/results" method="get">
-        <div class="mb-3 mt-3 btn-group btn-group-toggle float-sm-right">
-            <button id="btn--light" type="radio" name="theme" value="light" class="btn btn-dark"
-                    <c:if test="${param.theme.equals(\"light\")}">checked</c:if>> Light</button>
-            <button id="btn--dark" type="radio" name="theme" value="dark" class="btn btn-outline-dark"
-                    <c:if test="${param.theme.equals(\"dark\")}">checked</c:if>>Dark</button>
-
+<div class="container d-flex justify-content-center h-75">
+    <div class="align-self-center col">
+        <div class="text-center">
+            <img alt="image" class="img-fluid p-5 p-lg-0" width="350"
+                 src="/img/innovation${model.theme.toString().equals("dark")? "-dark" : ""}.png"
+            />
         </div>
-        <div class="form-group">
-            <div class="input-group">
-                <input class="form-control" type="text" name="query" placeholder="Zoeken">
-                <div class="input-group-append">
-                    <button type="submit" class="btn btn-primary">Search</button>
+        <div class="align-self-center">
+            <form class="container" action="${pageContext.request.contextPath}/results" method="get">
+                <div class="row align-items-end justify-content-between">
+                    <div class="col align-self-center">
+                        <a class="btn btn-outline-secondary" href="${pageContext.request.contextPath}/plugin">Test our chrome plugin</a>
+                    </div>
+                    <div class="mb-3 mt-3 btn-group btn-group-toggle col text-right d-block">
+                        <div class="btn-group">
+                            <button id="btn--light" type="radio" name="theme" value="light" class="btn btn-primary"
+                                    <c:if test="${param.theme.equals(\"light\")}">checked="checked"</c:if>> Light
+                            </button>
+                            <button id="btn--dark" type="radio" name="theme" value="dark" class="btn btn-outline-primary"
+                                    <c:if test="${param.theme.equals(\"dark\")}">checked="checked"</c:if>>Dark
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            </div>
+                <div class="form-group">
+                    <div class="input-group">
+                        <input class="form-control" type="text" name="query" placeholder="Zoeken">
+                        <div class="input-group-append">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
         </div>
-    </form>
+    </div>
 </div>
-
 </body>
 </html>

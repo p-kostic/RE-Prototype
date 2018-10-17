@@ -1,10 +1,18 @@
 @import "bootstrap/bootstrap";
 
+.form-control, .btn {
+ border-radius: 1px;
+}
+
 body.light {
   .list-group-item {
     .result_link {
       color: $green
     }
+  }
+
+  .btn-link {
+    color: #4495d4;
   }
 }
 
@@ -33,7 +41,7 @@ body.light {
       }
     }
 
-    #btn--light {
+    #btn--light, .btn-outline-secondary {
       @extend .btn-outline-light
     }
 

@@ -1,4 +1,6 @@
 <%--suppress XmlPathReference --%>
+<meta charset="utf-8">
+<%--suppress XmlPathReference --%>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 

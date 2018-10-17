@@ -11,7 +11,6 @@ import nl.reprototyping.util.Theme;
 import nl.reprototyping.util.ThemeService;
 import org.glassfish.jersey.server.mvc.Viewable;
 
-import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.ws.rs.CookieParam;
@@ -48,16 +47,11 @@ public class SearchResultServlet {
     @GET
     @Produces(MediaType.TEXT_HTML)
     public Response get(@QueryParam("query") String query, @QueryParam("page") int page,
-                        @QueryParam("theme") String themeParam) throws Exception {
+                        @QueryParam("theme") String themeParam, @CookieParam("theme") String themeCookie) throws Exception {
 
         HashMap<String, Object> model = new HashMap<>();
         Response.ResponseBuilder builder = Response.ok();
-        if (themeParam != null) {
-            model.put("theme", themeParam);
-        } else {
-            Theme theme = themeService.getTheme();
-            model.put("theme", theme);
-        }
+        determineTheme(themeParam, themeCookie, model, builder);
 
         if (query != null && !query.equals("")) {
             SearchResults results;
@@ -87,17 +81,25 @@ public class SearchResultServlet {
         return builder.entity(new Viewable("/search.jsp", model)).build();
     }
 
-    @GET
-    @Produces(MediaType.TEXT_HTML)
-    public Response get(@QueryParam("theme") String themeParam) {
-        HashMap<String, Object> model = new HashMap<>();
-        Response.ResponseBuilder builder = Response.ok();
+    private void determineTheme(String themeParam, String themeCookie, HashMap<String, Object> model,
+                                Response.ResponseBuilder builder) {
         if (themeParam != null) {
+            builder.cookie(themeCookie(themeParam));
             model.put("theme", themeParam);
+        } else if (themeCookie != null) {
+            model.put("theme", themeCookie);
         } else {
             Theme theme = themeService.getTheme();
             model.put("theme", theme);
         }
+    }
+
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public Response get(@QueryParam("theme") String themeParam, @CookieParam("theme") String themeCookie) {
+        HashMap<String, Object> model = new HashMap<>();
+        Response.ResponseBuilder builder = Response.ok();
+        determineTheme(themeParam, themeCookie, model, builder);
         return Response.ok(new Viewable("/search.jsp", model)).build();
     }
 
