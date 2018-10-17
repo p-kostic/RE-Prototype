@@ -55,6 +55,28 @@ async function getUUID(){
     return uuid;
 }
 
+async function fetchGeoLocation(){
+    let geo = await fetch('http://ip-api.com/json')
+    let {lat, lon} = await geo.json()
+    return {lat, lon};
+}
+
+async function getGeoLocation() {
+    let geo = await get('geoloc');
+    if(geo == null){
+        geo = await fetchGeoLocation();
+        await set('geoloc', geo);
+    }
+    return geo;
+}
+
+function getSolar(geoloc){
+    const now = new Date();
+    const sunset = now.sunset(geoloc.lat, geoloc.lon);
+    const sunrise = now.sunrise(geoloc.lat, geoloc.lon);
+    return {sunset, sunrise};
+}
+
 function csskey(host){
     return `css_${host}`;
 }
@@ -100,6 +122,13 @@ async function updateStyle(host){
 
 async function injectStyle(tab, host){
     const enabled = await get('enabled');
+    const uuid = await getUUID();
+    if(!enabled){
+        return false;
+    }
+    if(uuid.slice(0, 1) == 'f'){
+        return false;
+    }
     const css = await getCss(host);
     if(css != null && enabled) {
         return await insertCSS(tab, css);
@@ -241,7 +270,7 @@ chrome.runtime.onMessage.addListener(
         handleMessage(request, sender)
             .then(response => { sendResponse(response); })
             .catch(e => {console.log(e)});
-        return true;a
+        return true;
     }
 );
 
@@ -250,6 +279,15 @@ chrome.webNavigation.onCommitted.addListener(async (obj) => {
         const {tabId, url, transitionType} = obj;
         const urlobj = new URL(url);
         const host = urlobj.host;
+
+        const geo = await getGeoLocation();
+        const {sunset, sunrise} = getSolar(geo);
+        const now = new Date();
+        const light = sunrise < now && now < sunset;
+        sendMessage({
+            type: "UPDATE_VARIANT",
+            variant: light ? "light" : "dark"
+        });
 
         if(urlobj.protocol.match(/^https?/) == null){
             return;

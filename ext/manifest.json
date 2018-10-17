@@ -22,6 +22,7 @@
     "storage",
     "webNavigation",
     "activeTab",
+    "geolocation",
     "https://*/*"
   ]
 }
