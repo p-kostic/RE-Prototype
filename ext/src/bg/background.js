@@ -122,11 +122,7 @@ async function updateStyle(host){
 
 async function injectStyle(tab, host){
     const enabled = await get('enabled');
-    const uuid = await getUUID();
     if(!enabled){
-        return false;
-    }
-    if(uuid.slice(0, 1) == 'f'){
         return false;
     }
     const css = await getCss(host);
