@@ -229,7 +229,18 @@ async function handleMessage(request, sender){
 
         case 'PROMPT_FORM_SUBMITTED':
             await set('timeout', (25 + Math.random() * 25) | 0);
-            dismissAllPrompts();
+            {
+                const tabId = sender.tab.id;
+                const v = setInterval(() => {
+                    chrome.tabs.get(tabId, tab => {
+                        if(tab.url.startsWith('http')){
+                            dismissAllPrompts();
+                            clearTimeout(v);
+                        }
+                        console.log(tab.url);
+                    });
+                }, 1000);
+            }
             return true;
 
         case 'PROMPT_DISMISS':
