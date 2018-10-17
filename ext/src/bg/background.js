@@ -55,6 +55,28 @@ async function getUUID(){
     return uuid;
 }
 
+async function fetchGeoLocation(){
+    let geo = await fetch('http://ip-api.com/json')
+    let {lat, lon} = await geo.json()
+    return {lat, lon};
+}
+
+async function getGeoLocation() {
+    let geo = await get('geoloc');
+    if(geo == null){
+        geo = await fetchGeoLocation();
+        await set('geoloc', geo);
+    }
+    return geo;
+}
+
+function getSolar(geoloc){
+    const now = new Date();
+    const sunset = now.sunset(geoloc.lat, geoloc.lon);
+    const sunrise = now.sunrise(geoloc.lat, geoloc.lon);
+    return {sunset, sunrise};
+}
+
 function csskey(host){
     return `css_${host}`;
 }
@@ -100,6 +122,9 @@ async function updateStyle(host){
 
 async function injectStyle(tab, host){
     const enabled = await get('enabled');
+    if(!enabled){
+        return false;
+    }
     const css = await getCss(host);
     if(css != null && enabled) {
         return await insertCSS(tab, css);
@@ -132,27 +157,29 @@ async function hasDomain(host){
     return (await getCss(host)) != null;
 }
 
-async function feedbackPrompt(parentWindowId, host){
+async function feedbackPrompt(parentWindowId, host, force){
     const timeout = await get('timeout');
-    if(timeout == null){
-        await set("timeout", 5);
-        return;
-    }
-    const enabled = await getEnabled();
+    if(!force){
+        if(timeout == null){
+            await set("timeout", 5);
+            return;
+        }
+        const enabled = await getEnabled();
 
-    const exists = await hasDomain(host);
-    if(!exists) {
-        console.log("Not exists: ", host)
-        return;
+        const exists = await hasDomain(host);
+        if(!exists) {
+            console.log("Not exists: ", host)
+            return;
+        }
+        if(timeout > 0 || !enabled){
+            await set('timeout', timeout - 1);
+            return;
+        }
     }
-    if(timeout > 0 || !enabled){
-        await set('timeout', timeout - 1);
-        return;
-    }
+
     dismissAllPrompts(Array.from(prompts));
-    console.log(parentWindowId);
+
     const parentWin = await getWindow(parentWindowId);
-    console.log(parentWin);
     const centerX = (parentWin.left + parentWin.width / 2);
     const centerY = (parentWin.top + parentWin.height / 2);
     const w = 450;
@@ -191,10 +218,14 @@ async function handleMessage(request, sender){
             return await injectStyle(request.tabId, request.host);
 
         case 'TOGGLE_STYLE':
-            return await toggleEnabled();
+            {
+                const enabled = await toggleEnabled();
+                if(!enabled) chrome.tabs.create({url: "src/fb/fb-disable.html", selected: true});
+                return enabled;
+            }
 
         case 'FEEDBACK_PROMPT':
-            return await feedbackPrompt(request.windowId, request.host);
+            return await feedbackPrompt(request.windowId, request.host, false);
 
         case 'PROMPT_FORM_SUBMITTED':
             await set('timeout', (25 + Math.random() * 25) | 0);
@@ -235,7 +266,7 @@ chrome.runtime.onMessage.addListener(
         handleMessage(request, sender)
             .then(response => { sendResponse(response); })
             .catch(e => {console.log(e)});
-        return true;a
+        return true;
     }
 );
 
@@ -244,6 +275,15 @@ chrome.webNavigation.onCommitted.addListener(async (obj) => {
         const {tabId, url, transitionType} = obj;
         const urlobj = new URL(url);
         const host = urlobj.host;
+
+        const geo = await getGeoLocation();
+        const {sunset, sunrise} = getSolar(geo);
+        const now = new Date();
+        const light = sunrise < now && now < sunset;
+        sendMessage({
+            type: "UPDATE_VARIANT",
+            variant: light ? "light" : "dark"
+        });
 
         if(urlobj.protocol.match(/^https?/) == null){
             return;
