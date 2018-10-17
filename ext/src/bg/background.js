@@ -132,27 +132,29 @@ async function hasDomain(host){
     return (await getCss(host)) != null;
 }
 
-async function feedbackPrompt(parentWindowId, host){
+async function feedbackPrompt(parentWindowId, host, force){
     const timeout = await get('timeout');
-    if(timeout == null){
-        await set("timeout", 5);
-        return;
-    }
-    const enabled = await getEnabled();
+    if(!force){
+        if(timeout == null){
+            await set("timeout", 5);
+            return;
+        }
+        const enabled = await getEnabled();
 
-    const exists = await hasDomain(host);
-    if(!exists) {
-        console.log("Not exists: ", host)
-        return;
+        const exists = await hasDomain(host);
+        if(!exists) {
+            console.log("Not exists: ", host)
+            return;
+        }
+        if(timeout > 0 || !enabled){
+            await set('timeout', timeout - 1);
+            return;
+        }
     }
-    if(timeout > 0 || !enabled){
-        await set('timeout', timeout - 1);
-        return;
-    }
+
     dismissAllPrompts(Array.from(prompts));
-    console.log(parentWindowId);
+
     const parentWin = await getWindow(parentWindowId);
-    console.log(parentWin);
     const centerX = (parentWin.left + parentWin.width / 2);
     const centerY = (parentWin.top + parentWin.height / 2);
     const w = 450;
@@ -191,10 +193,14 @@ async function handleMessage(request, sender){
             return await injectStyle(request.tabId, request.host);
 
         case 'TOGGLE_STYLE':
-            return await toggleEnabled();
+            {
+                const enabled = await toggleEnabled();
+                if(!enabled) chrome.tabs.create({url: "src/fb/fb-disable.html", selected: true});
+                return enabled;
+            }
 
         case 'FEEDBACK_PROMPT':
-            return await feedbackPrompt(request.windowId, request.host);
+            return await feedbackPrompt(request.windowId, request.host, false);
 
         case 'PROMPT_FORM_SUBMITTED':
             await set('timeout', (25 + Math.random() * 25) | 0);
